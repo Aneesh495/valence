@@ -87,6 +87,7 @@ contract ValencePortfolioMargin is IValencePortfolioMargin {
         int256 totalPnL = 0;
         uint256 grossImr = 0;
         uint256 grossMmr = 0;
+        uint256 grossVolNotional = 0;
 
         int256[] memory notionals = new int256[](n);
         int256[] memory covMatrix = new int256[](n * n);
@@ -102,6 +103,9 @@ contract ValencePortfolioMargin is IValencePortfolioMargin {
                 ? int256(positions[i].notionalUsd)
                 : -int256(positions[i].notionalUsd);
 
+            ValenceRiskMatrix.MarketRiskConfig memory cfgI = riskMatrix.getMarketConfig(positions[i].marketId);
+            grossVolNotional += (positions[i].notionalUsd * cfgI.volatilityWad) / FixedPointMath.WAD;
+
             _populateCovarianceRow(positions, covMatrix, i, n);
 
             unchecked {
@@ -111,14 +115,34 @@ contract ValencePortfolioMargin is IValencePortfolioMargin {
 
         profile.totalUnrealizedPnlUsd = totalPnL >= 0 ? uint256(totalPnL) : 0;
 
-        // Compute net portfolio covariance risk
-        uint256 portfolioVariance = MatrixMath.quadraticRiskForm(notionals, covMatrix);
-        uint256 netCovarianceRisk = MatrixMath.portfolioStandardDeviation(portfolioVariance);
+        // Compute net portfolio covariance risk and diversification ratio
+        uint256 netMmr = grossMmr;
+        uint256 netImr = grossImr;
+        if (n > 0 && grossVolNotional > 0) {
+            uint256 portfolioVariance = MatrixMath.quadraticRiskForm(notionals, covMatrix);
+            uint256 netCovarianceRisk = MatrixMath.portfolioStandardDeviation(portfolioVariance);
+            uint256 riskFactorWad = (netCovarianceRisk * FixedPointMath.WAD) / grossVolNotional;
+            if (riskFactorWad > FixedPointMath.WAD) {
+                riskFactorWad = FixedPointMath.WAD;
+            }
 
-        // Blended portfolio margin requirement: max(netCovarianceRisk, 0.40 * grossMmr)
-        uint256 floorMmr = (grossMmr * 4000) / 10000;
-        profile.maintenanceMarginUsd = netCovarianceRisk > floorMmr ? netCovarianceRisk : floorMmr;
-        profile.initialMarginRequiredUsd = grossImr;
+            // Floor MMR at 40% of gross MMR to guard against model breakdown and basis risk
+            uint256 floorMmr = (grossMmr * 4000) / 10000;
+            netMmr = (grossMmr * riskFactorWad) / FixedPointMath.WAD;
+            if (netMmr < floorMmr) {
+                netMmr = floorMmr;
+            }
+
+            // Floor IMR at 50% of gross IMR
+            uint256 floorImr = (grossImr * 5000) / 10000;
+            netImr = (grossImr * riskFactorWad) / FixedPointMath.WAD;
+            if (netImr < floorImr) {
+                netImr = floorImr;
+            }
+        }
+
+        profile.maintenanceMarginUsd = netMmr;
+        profile.initialMarginRequiredUsd = netImr;
 
         // Net Account Equity = Collateral + Total PnL
         int256 netEquity = int256(haircutCollateralUsd) + totalPnL;
