@@ -17,6 +17,7 @@ target/
 *.dylib
 CMakeCache.txt
 CMakeFiles/
+engine/valence_benchmark
 
 # Python
 __pycache__/
