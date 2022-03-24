@@ -1,0 +1,24 @@
+{
+  "name": "@valence/sdk",
+  "version": "1.0.0",
+  "description": "Institutional TypeScript SDK and Autonomous Keeper for the Valence Decentralized Clearinghouse",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "node --test dist/test/*.test.js"
+  },
+  "keywords": [
+    "clearinghouse",
+    "concentrated-liquidity",
+    "portfolio-margin",
+    "derivatives",
+    "solidity"
+  ],
+  "author": "Aneesh Krishna",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "@types/node": "^20.11.0"
+  }
+}
