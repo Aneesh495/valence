@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import {IValenceAccount} from "../interfaces/IValenceAccount.sol";
+import { IValenceAccount } from "../interfaces/IValenceAccount.sol";
 
 /// @title ValenceAccount
 /// @notice Subaccount registry with granular session key permissions and programmatic delegation.
@@ -44,10 +44,7 @@ contract ValenceAccount is IValenceAccount {
         if (_subaccounts[subaccountId].isActive) revert ValenceAccount__SubaccountAlreadyExists();
 
         _subaccounts[subaccountId] = Subaccount({
-            owner: msg.sender,
-            subaccountIndex: subaccountIndex,
-            createdAt: uint64(block.timestamp),
-            isActive: true
+            owner: msg.sender, subaccountIndex: subaccountIndex, createdAt: uint64(block.timestamp), isActive: true
         });
 
         _ownerSubaccounts[msg.sender].push(subaccountId);
@@ -60,20 +57,15 @@ contract ValenceAccount is IValenceAccount {
     /// @param delegate The delegated address (e.g. trading bot, session key)
     /// @param permissions Bitmask of allowed actions
     /// @param durationSeconds Validity duration of the session key
-    function authorizeDelegate(
-        bytes32 subaccountId,
-        address delegate,
-        uint32 permissions,
-        uint64 durationSeconds
-    ) external onlySubaccountOwner(subaccountId) {
+    function authorizeDelegate(bytes32 subaccountId, address delegate, uint32 permissions, uint64 durationSeconds)
+        external
+        onlySubaccountOwner(subaccountId)
+    {
         if (delegate == address(0)) revert ValenceAccount__ZeroAddress();
 
         uint64 expiry = uint64(block.timestamp) + durationSeconds;
-        _delegates[subaccountId][delegate] = DelegateInfo({
-            permissions: permissions,
-            expiryTimestamp: expiry,
-            isActive: true
-        });
+        _delegates[subaccountId][delegate] =
+            DelegateInfo({ permissions: permissions, expiryTimestamp: expiry, isActive: true });
 
         emit DelegateAuthorized(subaccountId, delegate, permissions);
     }
@@ -85,11 +77,11 @@ contract ValenceAccount is IValenceAccount {
     }
 
     /// @notice Validates whether a caller is authorized to perform an action on a subaccount.
-    function isOwnerOrDelegate(
-        bytes32 subaccountId,
-        address caller,
-        uint32 requiredPermission
-    ) external view returns (bool) {
+    function isOwnerOrDelegate(bytes32 subaccountId, address caller, uint32 requiredPermission)
+        external
+        view
+        returns (bool)
+    {
         Subaccount memory sub = _subaccounts[subaccountId];
         if (!sub.isActive) return false;
         if (caller == sub.owner) return true;

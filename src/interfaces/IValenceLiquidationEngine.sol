@@ -13,10 +13,7 @@ interface IValenceLiquidationEngine {
     );
 
     event LiquidationAuctionFilled(
-        bytes32 indexed auctionId,
-        address indexed liquidator,
-        uint256 debtRepaidUsd,
-        uint256 collateralAwardedUsd
+        bytes32 indexed auctionId, address indexed liquidator, uint256 debtRepaidUsd, uint256 collateralAwardedUsd
     );
 
     event AutoDeleveraged(
@@ -40,7 +37,9 @@ interface IValenceLiquidationEngine {
     }
 
     function initiateLiquidation(bytes32 subaccountId) external returns (bytes32 auctionId);
-    function executeLiquidationPurchase(bytes32 auctionId, uint256 debtAmountToRepay) external returns (uint256 collateralReceived);
+    function executeLiquidationPurchase(bytes32 auctionId, uint256 debtAmountToRepay)
+        external
+        returns (uint256 collateralReceived);
     function getCurrentDiscount(bytes32 auctionId) external view returns (uint256 discountBps);
     function getAuction(bytes32 auctionId) external view returns (DutchAuction memory);
 }

@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import {Test} from "forge-std/Test.sol";
-import {ValenceClearinghouse} from "../../src/core/ValenceClearinghouse.sol";
-import {ValenceVault} from "../../src/core/ValenceVault.sol";
-import {ValenceAccount} from "../../src/core/ValenceAccount.sol";
-import {ValencePortfolioMargin} from "../../src/margin/ValencePortfolioMargin.sol";
-import {ValenceRiskMatrix} from "../../src/margin/ValenceRiskMatrix.sol";
-import {ValenceOracleRelay} from "../../src/oracle/ValenceOracleRelay.sol";
-import {ValenceFundingEngine} from "../../src/core/ValenceFundingEngine.sol";
-import {ValencePositionManager} from "../../src/core/ValencePositionManager.sol";
-import {MockERC20} from "../mocks/MockERC20.sol";
-import {FixedPointMath} from "../../src/libraries/FixedPointMath.sol";
+import { Test } from "forge-std/Test.sol";
+import { ValenceClearinghouse } from "../../src/core/ValenceClearinghouse.sol";
+import { ValenceVault } from "../../src/core/ValenceVault.sol";
+import { ValenceAccount } from "../../src/core/ValenceAccount.sol";
+import { ValencePortfolioMargin } from "../../src/margin/ValencePortfolioMargin.sol";
+import { ValenceRiskMatrix } from "../../src/margin/ValenceRiskMatrix.sol";
+import { ValenceOracleRelay } from "../../src/oracle/ValenceOracleRelay.sol";
+import { ValenceFundingEngine } from "../../src/core/ValenceFundingEngine.sol";
+import { ValencePositionManager } from "../../src/core/ValencePositionManager.sol";
+import { MockERC20 } from "../mocks/MockERC20.sol";
+import { FixedPointMath } from "../../src/libraries/FixedPointMath.sol";
 
 contract ValenceClearinghouseTest is Test {
     ValenceAccount internal account;
@@ -38,12 +38,7 @@ contract ValenceClearinghouseTest is Test {
         margin = new ValencePortfolioMargin(address(vault), address(oracle), address(riskMatrix));
 
         clearinghouse = new ValenceClearinghouse(
-            address(vault),
-            address(account),
-            address(margin),
-            address(oracle),
-            address(funding),
-            address(posManager)
+            address(vault), address(account), address(margin), address(oracle), address(funding), address(posManager)
         );
 
         // Link clearinghouse authorizations
@@ -74,12 +69,13 @@ contract ValenceClearinghouseTest is Test {
     function test_Clearinghouse_ExecuteTradeLong() public {
         // Open 1 BTC long ($60,000 notional) with $50,000 collateral
         vm.prank(trader);
-        (uint256 execPrice, uint256 fee) = clearinghouse.executeTrade(
-            subaccountId,
-            btcMarket,
-            1e18, // 1 BTC long
-            60000 << 96
-        );
+        (uint256 execPrice, uint256 fee) =
+            clearinghouse.executeTrade(
+                subaccountId,
+                btcMarket,
+                1e18, // 1 BTC long
+                60000 << 96
+            );
 
         assertEq(execPrice, 60000 << 96);
         // Fee = 60,000 * 10 bps = 60 USD (60e18)
@@ -126,7 +122,7 @@ contract ValenceClearinghouseTest is Test {
 
         clearinghouse.setPaused(false);
         vm.prank(trader);
-        (uint256 execPrice, ) = clearinghouse.executeTrade(subaccountId, btcMarket, 1e18, 60000 << 96);
+        (uint256 execPrice,) = clearinghouse.executeTrade(subaccountId, btcMarket, 1e18, 60000 << 96);
         assertEq(execPrice, 60000 << 96);
     }
 

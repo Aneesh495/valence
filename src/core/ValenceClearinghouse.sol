@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import {IValenceClearinghouse} from "../interfaces/IValenceClearinghouse.sol";
-import {IValenceVault} from "../interfaces/IValenceVault.sol";
-import {IValenceAccount} from "../interfaces/IValenceAccount.sol";
-import {IValencePortfolioMargin} from "../interfaces/IValencePortfolioMargin.sol";
-import {IValenceOracleRelay} from "../interfaces/IValenceOracleRelay.sol";
-import {IValenceFundingEngine} from "../interfaces/IValenceFundingEngine.sol";
-import {IValenceLiquidationEngine} from "../interfaces/IValenceLiquidationEngine.sol";
-import {ValencePositionManager} from "./ValencePositionManager.sol";
-import {ValenceFeeDistributor} from "./ValenceFeeDistributor.sol";
-import {ValenceCircuitBreaker} from "../oracle/ValenceCircuitBreaker.sol";
-import {FixedPointMath} from "../libraries/FixedPointMath.sol";
+import { IValenceClearinghouse } from "../interfaces/IValenceClearinghouse.sol";
+import { IValenceVault } from "../interfaces/IValenceVault.sol";
+import { IValenceAccount } from "../interfaces/IValenceAccount.sol";
+import { IValencePortfolioMargin } from "../interfaces/IValencePortfolioMargin.sol";
+import { IValenceOracleRelay } from "../interfaces/IValenceOracleRelay.sol";
+import { IValenceFundingEngine } from "../interfaces/IValenceFundingEngine.sol";
+import { IValenceLiquidationEngine } from "../interfaces/IValenceLiquidationEngine.sol";
+import { ValencePositionManager } from "./ValencePositionManager.sol";
+import { ValenceFeeDistributor } from "./ValenceFeeDistributor.sol";
+import { ValenceCircuitBreaker } from "../oracle/ValenceCircuitBreaker.sol";
+import { FixedPointMath } from "../libraries/FixedPointMath.sol";
 
 /// @title ValenceClearinghouse
 /// @notice Central clearinghouse coordinating portfolio margin, trade execution, and funding settlement.
@@ -60,12 +60,8 @@ contract ValenceClearinghouse is IValenceClearinghouse {
         address _positionManager
     ) {
         if (
-            _vault == address(0) ||
-            _accountManager == address(0) ||
-            _portfolioMargin == address(0) ||
-            _oracleRelay == address(0) ||
-            _fundingEngine == address(0) ||
-            _positionManager == address(0)
+            _vault == address(0) || _accountManager == address(0) || _portfolioMargin == address(0)
+                || _oracleRelay == address(0) || _fundingEngine == address(0) || _positionManager == address(0)
         ) {
             revert ValenceClearinghouse__ZeroAddress();
         }
@@ -104,12 +100,12 @@ contract ValenceClearinghouse is IValenceClearinghouse {
     }
 
     /// @notice Executes a perpetual trade, updating position, funding, and asserting post-trade solvency.
-    function executeTrade(
-        bytes32 subaccountId,
-        bytes32 marketId,
-        int256 sizeDelta,
-        uint256 acceptablePriceX96
-    ) external override whenNotPaused returns (uint256 executedPriceX96, uint256 feeUsd) {
+    function executeTrade(bytes32 subaccountId, bytes32 marketId, int256 sizeDelta, uint256 acceptablePriceX96)
+        external
+        override
+        whenNotPaused
+        returns (uint256 executedPriceX96, uint256 feeUsd)
+    {
         // Assert trading permission
         if (!accountManager.isOwnerOrDelegate(subaccountId, msg.sender, 2)) {
             revert ValenceClearinghouse__Unauthorized();
@@ -127,8 +123,12 @@ contract ValenceClearinghouse is IValenceClearinghouse {
 
         // Slippage assertion
         if (acceptablePriceX96 != 0) {
-            if (sizeDelta > 0 && executedPriceX96 > acceptablePriceX96) revert ValenceClearinghouse__SlippageExceeded();
-            if (sizeDelta < 0 && executedPriceX96 < acceptablePriceX96) revert ValenceClearinghouse__SlippageExceeded();
+            if (sizeDelta > 0 && executedPriceX96 > acceptablePriceX96) {
+                revert ValenceClearinghouse__SlippageExceeded();
+            }
+            if (sizeDelta < 0 && executedPriceX96 < acceptablePriceX96) {
+                revert ValenceClearinghouse__SlippageExceeded();
+            }
         }
 
         // Update funding prior to trade execution

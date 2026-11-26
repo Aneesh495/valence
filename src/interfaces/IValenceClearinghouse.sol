@@ -20,12 +20,9 @@ interface IValenceClearinghouse {
         uint256 feePaidUsd
     );
 
-    function executeTrade(
-        bytes32 subaccountId,
-        bytes32 marketId,
-        int256 sizeDelta,
-        uint256 acceptablePriceX96
-    ) external returns (uint256 executedPriceX96, uint256 feeUsd);
+    function executeTrade(bytes32 subaccountId, bytes32 marketId, int256 sizeDelta, uint256 acceptablePriceX96)
+        external
+        returns (uint256 executedPriceX96, uint256 feeUsd);
 
     function settleFunding(bytes32 subaccountId, bytes32 marketId) external returns (int256 fundingPayment);
     function liquidateAccount(bytes32 subaccountId) external returns (bytes32 auctionId);

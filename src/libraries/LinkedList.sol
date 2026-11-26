@@ -40,11 +40,7 @@ library LinkedList {
         if (id == SENTINEL) revert LinkedList__ZeroIdNotAllowed();
         if (self.elements[id].exists) revert LinkedList__AlreadyExists();
 
-        self.elements[id] = Element({
-            prev: self.tail,
-            next: SENTINEL,
-            exists: true
-        });
+        self.elements[id] = Element({ prev: self.tail, next: SENTINEL, exists: true });
 
         if (self.tail != SENTINEL) {
             self.elements[self.tail].next = id;

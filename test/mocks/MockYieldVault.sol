@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import {IERC4626} from "../../src/interfaces/IERC4626.sol";
-import {IERC20} from "../../src/interfaces/IERC20.sol";
+import { IERC4626 } from "../../src/interfaces/IERC4626.sol";
+import { IERC20 } from "../../src/interfaces/IERC20.sol";
 
 contract MockYieldVault is IERC4626 {
     address public override asset;

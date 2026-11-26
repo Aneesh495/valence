@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import {IERC721} from "../interfaces/IERC721.sol";
-import {IValencePool} from "../interfaces/IValencePool.sol";
-import {IValencePoolFactory} from "../interfaces/IValencePoolFactory.sol";
-import {IValenceMintCallback} from "./ValencePool.sol";
-import {IERC20} from "../interfaces/IERC20.sol";
+import { IERC721 } from "../interfaces/IERC721.sol";
+import { IValencePool } from "../interfaces/IValencePool.sol";
+import { IValencePoolFactory } from "../interfaces/IValencePoolFactory.sol";
+import { IValenceMintCallback } from "./ValencePool.sol";
+import { IERC20 } from "../interfaces/IERC20.sol";
 
 /// @title ValencePositionNFT
 /// @notice Tokenized ERC-721 wrapper for concentrated liquidity provider positions with on-chain metadata.
@@ -113,24 +113,14 @@ contract ValencePositionNFT is IERC721, IValenceMintCallback {
     /// @notice Mints a new concentrated liquidity position and wraps it into an ERC-721 NFT.
     function mint(MintParams calldata params)
         external
-        returns (
-            uint256 tokenId,
-            uint128 liquidity,
-            uint256 amount0,
-            uint256 amount1
-        )
+        returns (uint256 tokenId, uint128 liquidity, uint256 amount0, uint256 amount1)
     {
         tokenId = _nextId++;
         _owners[tokenId] = params.recipient;
         _balances[params.recipient] += 1;
 
-        (amount0, amount1) = IValencePool(params.pool).mint(
-            address(this),
-            params.tickLower,
-            params.tickUpper,
-            params.amount,
-            abi.encode(msg.sender, params.pool)
-        );
+        (amount0, amount1) = IValencePool(params.pool)
+            .mint(address(this), params.tickLower, params.tickUpper, params.amount, abi.encode(msg.sender, params.pool));
 
         _positions[tokenId] = PositionDetails({
             nonce: 0,
@@ -188,9 +178,8 @@ contract ValencePositionNFT is IERC721, IValenceMintCallback {
     }
 
     function _pay(address token, address payer, address recipient, uint256 value) private {
-        (bool success, bytes memory data) = token.call(
-            abi.encodeWithSelector(IERC20.transferFrom.selector, payer, recipient, value)
-        );
+        (bool success, bytes memory data) =
+            token.call(abi.encodeWithSelector(IERC20.transferFrom.selector, payer, recipient, value));
         if (!success || (data.length > 0 && !abi.decode(data, (bool)))) {
             revert ValencePositionNFT__TransferFailed();
         }

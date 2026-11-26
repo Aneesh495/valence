@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import {IValenceOracleRelay} from "../interfaces/IValenceOracleRelay.sol";
-import {FixedPointMath} from "../libraries/FixedPointMath.sol";
+import { IValenceOracleRelay } from "../interfaces/IValenceOracleRelay.sol";
+import { FixedPointMath } from "../libraries/FixedPointMath.sol";
 
 /// @title ValenceOracleRelay
 /// @notice Fault-tolerant multi-feed oracle aggregator with geometric TWAP and deviation guards.
@@ -14,11 +14,11 @@ contract ValenceOracleRelay is IValenceOracleRelay {
 
     struct FeedConfig {
         bool isConfigured;
-        address primaryAdapter;    // e.g. Pyth pull adapter
-        address secondaryAdapter;  // e.g. Chainlink push adapter
-        uint32 maxStalenessSeconds;// e.g. 60 seconds
-        uint32 maxDivergenceBps;   // e.g. 200 = 2% max divergence between feeds
-        uint256 fallbackPriceX96;  // Last known valid price
+        address primaryAdapter; // e.g. Pyth pull adapter
+        address secondaryAdapter; // e.g. Chainlink push adapter
+        uint32 maxStalenessSeconds; // e.g. 60 seconds
+        uint32 maxDivergenceBps; // e.g. 200 = 2% max divergence between feeds
+        uint256 fallbackPriceX96; // Last known valid price
     }
 
     struct TwapObservation {
@@ -64,11 +64,9 @@ contract ValenceOracleRelay is IValenceOracleRelay {
         });
 
         // Initialize TWAP observation buffer
-        _twapObservations[marketId].push(TwapObservation({
-            timestamp: uint64(block.timestamp),
-            priceX96: initialPriceX96,
-            cumulativeLogPrice: 0
-        }));
+        _twapObservations[marketId].push(
+            TwapObservation({ timestamp: uint64(block.timestamp), priceX96: initialPriceX96, cumulativeLogPrice: 0 })
+        );
     }
 
     /// @notice Records a new price observation into the TWAP circular buffer.
@@ -84,11 +82,13 @@ contract ValenceOracleRelay is IValenceOracleRelay {
 
         if (timeDelta > 0) {
             int256 logPrice = FixedPointMath.lnWad(int256((priceX96 * FixedPointMath.WAD) >> 96));
-            obs.push(TwapObservation({
-                timestamp: uint64(block.timestamp),
-                priceX96: priceX96,
-                cumulativeLogPrice: obs[lastIdx].cumulativeLogPrice + logPrice * int256(uint256(timeDelta))
-            }));
+            obs.push(
+                TwapObservation({
+                    timestamp: uint64(block.timestamp),
+                    priceX96: priceX96,
+                    cumulativeLogPrice: obs[lastIdx].cumulativeLogPrice + logPrice * int256(uint256(timeDelta))
+                })
+            );
         }
 
         emit PriceReported(marketId, priceX96, uint64(block.timestamp), 0);
@@ -178,9 +178,7 @@ contract ValenceOracleRelay is IValenceOracleRelay {
         returns (uint256 priceX96, uint64 timestamp, bool valid)
     {
         if (adapter == address(0)) return (0, 0, false);
-        (bool success, bytes memory data) = adapter.staticcall(
-            abi.encodeWithSignature("getPrice(bytes32)", marketId)
-        );
+        (bool success, bytes memory data) = adapter.staticcall(abi.encodeWithSignature("getPrice(bytes32)", marketId));
         if (success && data.length >= 64) {
             (priceX96, timestamp) = abi.decode(data, (uint256, uint64));
             valid = priceX96 > 0;

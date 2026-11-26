@@ -1,26 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import {IValencePool} from "../interfaces/IValencePool.sol";
-import {IERC20} from "../interfaces/IERC20.sol";
-import {TickMath} from "../libraries/TickMath.sol";
-import {TickBitmap} from "../libraries/TickBitmap.sol";
-import {SqrtPriceMath} from "../libraries/SqrtPriceMath.sol";
-import {SwapMath} from "../libraries/SwapMath.sol";
-import {FullMath} from "../libraries/FullMath.sol";
-import {SafeCast} from "../libraries/SafeCast.sol";
+import { IValencePool } from "../interfaces/IValencePool.sol";
+import { IERC20 } from "../interfaces/IERC20.sol";
+import { TickMath } from "../libraries/TickMath.sol";
+import { TickBitmap } from "../libraries/TickBitmap.sol";
+import { SqrtPriceMath } from "../libraries/SqrtPriceMath.sol";
+import { SwapMath } from "../libraries/SwapMath.sol";
+import { FullMath } from "../libraries/FullMath.sol";
+import { SafeCast } from "../libraries/SafeCast.sol";
 
 interface IValencePoolDeployer {
     function parameters()
         external
         view
-        returns (
-            address factory,
-            address token0,
-            address token1,
-            uint24 fee,
-            int24 tickSpacing
-        );
+        returns (address factory, address token0, address token1, uint24 fee, int24 tickSpacing);
 }
 
 interface IValenceMintCallback {
@@ -106,24 +100,18 @@ contract ValencePool is IValencePool {
     }
 
     /// @notice Adds liquidity to a tick range.
-    function mint(
-        address recipient,
-        int24 tickLower,
-        int24 tickUpper,
-        uint128 amount,
-        bytes calldata data
-    ) external override lock returns (uint256 amount0, uint256 amount1) {
+    function mint(address recipient, int24 tickLower, int24 tickUpper, uint128 amount, bytes calldata data)
+        external
+        override
+        lock
+        returns (uint256 amount0, uint256 amount1)
+    {
         if (tickLower >= tickUpper || tickLower < TickMath.MIN_TICK || tickUpper > TickMath.MAX_TICK) {
             revert ValencePool__InvalidTicks();
         }
         if (amount == 0) revert ValencePool__InsufficientInput();
 
-        (amount0, amount1) = _modifyPosition(
-            recipient,
-            tickLower,
-            tickUpper,
-            int128(amount)
-        );
+        (amount0, amount1) = _modifyPosition(recipient, tickLower, tickUpper, int128(amount));
 
         uint256 balance0Before = _balance0();
         uint256 balance1Before = _balance1();
@@ -139,22 +127,18 @@ contract ValencePool is IValencePool {
     }
 
     /// @notice Removes liquidity from a tick range.
-    function burn(
-        int24 tickLower,
-        int24 tickUpper,
-        uint128 amount
-    ) external override lock returns (uint256 amount0, uint256 amount1) {
+    function burn(int24 tickLower, int24 tickUpper, uint128 amount)
+        external
+        override
+        lock
+        returns (uint256 amount0, uint256 amount1)
+    {
         if (tickLower >= tickUpper || tickLower < TickMath.MIN_TICK || tickUpper > TickMath.MAX_TICK) {
             revert ValencePool__InvalidTicks();
         }
         if (amount == 0) revert ValencePool__InsufficientInput();
 
-        (amount0, amount1) = _modifyPosition(
-            msg.sender,
-            tickLower,
-            tickUpper,
-            -int128(amount)
-        );
+        (amount0, amount1) = _modifyPosition(msg.sender, tickLower, tickUpper, -int128(amount));
 
         emit Burn(msg.sender, tickLower, tickUpper, amount, amount0, amount1);
     }
@@ -196,11 +180,9 @@ contract ValencePool is IValencePool {
         if (amountSpecified == 0) revert ValencePool__InsufficientInput();
 
         Slot0 memory state = slot0;
-        if (
-            zeroForOne
+        if (zeroForOne
                 ? sqrtPriceLimitX96 >= state.sqrtPriceX96 || sqrtPriceLimitX96 <= TickMath.MIN_SQRT_RATIO
-                : sqrtPriceLimitX96 <= state.sqrtPriceX96 || sqrtPriceLimitX96 >= TickMath.MAX_SQRT_RATIO
-        ) {
+                : sqrtPriceLimitX96 <= state.sqrtPriceX96 || sqrtPriceLimitX96 >= TickMath.MAX_SQRT_RATIO) {
             revert ValencePool__PriceLimitExceeded();
         }
 
@@ -209,29 +191,19 @@ contract ValencePool is IValencePool {
         int256 amountCalculated = 0;
 
         while (amountSpecifiedRemaining != 0 && state.sqrtPriceX96 != sqrtPriceLimitX96) {
-            (int24 nextTick, bool initialized) = tickBitmap.nextInitializedTickWithinOneWord(
-                state.tick,
-                tickSpacing,
-                zeroForOne
-            );
+            (int24 nextTick, bool initialized) =
+                tickBitmap.nextInitializedTickWithinOneWord(state.tick, tickSpacing, zeroForOne);
 
             uint160 sqrtPriceNextX96 = TickMath.getSqrtRatioAtTick(nextTick);
 
-            uint160 targetPriceX96 = (zeroForOne ? sqrtPriceNextX96 < sqrtPriceLimitX96 : sqrtPriceNextX96 > sqrtPriceLimitX96)
+            uint160 targetPriceX96 = (zeroForOne
+                    ? sqrtPriceNextX96 < sqrtPriceLimitX96
+                    : sqrtPriceNextX96 > sqrtPriceLimitX96)
                 ? sqrtPriceLimitX96
                 : sqrtPriceNextX96;
 
-            (
-                uint160 stepNextPriceX96,
-                uint256 stepAmountIn,
-                uint256 stepAmountOut,
-                uint256 stepFeeAmount
-            ) = SwapMath.computeSwapStep(
-                state.sqrtPriceX96,
-                targetPriceX96,
-                currentLiquidity,
-                amountSpecifiedRemaining,
-                state.feePips
+            (uint160 stepNextPriceX96, uint256 stepAmountIn, uint256 stepAmountOut, uint256 stepFeeAmount) = SwapMath.computeSwapStep(
+                state.sqrtPriceX96, targetPriceX96, currentLiquidity, amountSpecifiedRemaining, state.feePips
             );
 
             if (amountSpecified > 0) {
@@ -259,9 +231,7 @@ contract ValencePool is IValencePool {
                 if (initialized) {
                     int128 net = ticks[nextTick].liquidityNet;
                     if (zeroForOne) net = -net;
-                    currentLiquidity = net < 0
-                        ? currentLiquidity - uint128(-net)
-                        : currentLiquidity + uint128(net);
+                    currentLiquidity = net < 0 ? currentLiquidity - uint128(-net) : currentLiquidity + uint128(net);
                 }
                 state.tick = zeroForOne ? nextTick - 1 : nextTick;
             } else if (state.sqrtPriceX96 != targetPriceX96) {
@@ -294,12 +264,7 @@ contract ValencePool is IValencePool {
     }
 
     /// @notice Flash borrow token0 and/or token1.
-    function flash(
-        address recipient,
-        uint256 amount0,
-        uint256 amount1,
-        bytes calldata data
-    ) external override lock {
+    function flash(address recipient, uint256 amount0, uint256 amount1, bytes calldata data) external override lock {
         uint256 fee0 = FullMath.mulDivRoundingUp(amount0, fee, 1e6);
         uint256 fee1 = FullMath.mulDivRoundingUp(amount1, fee, 1e6);
 
@@ -319,12 +284,10 @@ contract ValencePool is IValencePool {
 
     // --- Internal Helpers ---
 
-    function _modifyPosition(
-        address owner,
-        int24 tickLower,
-        int24 tickUpper,
-        int128 liquidityDelta
-    ) private returns (uint256 amount0, uint256 amount1) {
+    function _modifyPosition(address owner, int24 tickLower, int24 tickUpper, int128 liquidityDelta)
+        private
+        returns (uint256 amount0, uint256 amount1)
+    {
         bytes32 posKey = keccak256(abi.encodePacked(owner, tickLower, tickUpper));
         PositionInfo storage position = positions[posKey];
 
@@ -353,9 +316,7 @@ contract ValencePool is IValencePool {
                 uint128(liquidityDelta > 0 ? liquidityDelta : -liquidityDelta),
                 liquidityDelta > 0
             );
-            liquidity = liquidityDelta > 0
-                ? liquidity + uint128(liquidityDelta)
-                : liquidity - uint128(-liquidityDelta);
+            liquidity = liquidityDelta > 0 ? liquidity + uint128(liquidityDelta) : liquidity - uint128(-liquidityDelta);
         } else {
             amount1 = SqrtPriceMath.getAmount1Delta(
                 TickMath.getSqrtRatioAtTick(tickLower),
@@ -370,12 +331,7 @@ contract ValencePool is IValencePool {
             : position.liquidity - uint128(-liquidityDelta);
     }
 
-    function _updateTick(
-        int24 tick,
-        int24 currentTick,
-        int128 liquidityDelta,
-        bool isUpper
-    ) private {
+    function _updateTick(int24 tick, int24 currentTick, int128 liquidityDelta, bool isUpper) private {
         TickInfo storage info = ticks[tick];
         uint128 liquidityGrossBefore = info.liquidityGross;
         uint128 liquidityGrossAfter = liquidityDelta > 0
@@ -392,9 +348,7 @@ contract ValencePool is IValencePool {
         }
 
         info.liquidityGross = liquidityGrossAfter;
-        info.liquidityNet = isUpper
-            ? info.liquidityNet - liquidityDelta
-            : info.liquidityNet + liquidityDelta;
+        info.liquidityNet = isUpper ? info.liquidityNet - liquidityDelta : info.liquidityNet + liquidityDelta;
 
         if (liquidityGrossAfter == 0) {
             info.initialized = false;
@@ -403,23 +357,19 @@ contract ValencePool is IValencePool {
     }
 
     function _balance0() private view returns (uint256) {
-        (bool success, bytes memory data) = token0.staticcall(
-            abi.encodeWithSelector(IERC20.balanceOf.selector, address(this))
-        );
+        (bool success, bytes memory data) =
+            token0.staticcall(abi.encodeWithSelector(IERC20.balanceOf.selector, address(this)));
         return success && data.length >= 32 ? abi.decode(data, (uint256)) : 0;
     }
 
     function _balance1() private view returns (uint256) {
-        (bool success, bytes memory data) = token1.staticcall(
-            abi.encodeWithSelector(IERC20.balanceOf.selector, address(this))
-        );
+        (bool success, bytes memory data) =
+            token1.staticcall(abi.encodeWithSelector(IERC20.balanceOf.selector, address(this)));
         return success && data.length >= 32 ? abi.decode(data, (uint256)) : 0;
     }
 
     function _safeTransfer(address token, address to, uint256 amount) private {
-        (bool success, bytes memory data) = token.call(
-            abi.encodeWithSelector(IERC20.transfer.selector, to, amount)
-        );
+        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(IERC20.transfer.selector, to, amount));
         if (!success || (data.length > 0 && !abi.decode(data, (bool)))) {
             revert ValencePool__TransferFailed();
         }

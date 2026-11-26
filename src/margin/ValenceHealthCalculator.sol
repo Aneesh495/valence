@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import {IValencePortfolioMargin} from "../interfaces/IValencePortfolioMargin.sol";
-import {FixedPointMath} from "../libraries/FixedPointMath.sol";
+import { IValencePortfolioMargin } from "../interfaces/IValencePortfolioMargin.sol";
+import { FixedPointMath } from "../libraries/FixedPointMath.sol";
 
 /// @title ValenceHealthCalculator
 /// @notice Computes real-time leverage metrics, free margin capacity, and liquidation proximity buffers.
@@ -12,13 +12,13 @@ contract ValenceHealthCalculator {
     IValencePortfolioMargin public immutable portfolioMargin;
 
     struct HealthMetrics {
-        uint256 healthFactor;           // In WAD (1e18 = 100%)
-        uint256 freeCollateralUsd;      // Collateral available for withdrawal or new positions
-        uint256 currentLeverageWad;     // Total position notional / Net equity
-        uint256 maxLeverageWad;         // Theoretical maximum leverage before liquidation
-        uint256 liquidationBufferBps;   // Percentage drop in portfolio value before liquidation
-        bool canOpenPositions;          // Health factor allows new positions
-        bool isAtRiskOfLiquidation;     // Health factor between 100% and 115%
+        uint256 healthFactor; // In WAD (1e18 = 100%)
+        uint256 freeCollateralUsd; // Collateral available for withdrawal or new positions
+        uint256 currentLeverageWad; // Total position notional / Net equity
+        uint256 maxLeverageWad; // Theoretical maximum leverage before liquidation
+        uint256 liquidationBufferBps; // Percentage drop in portfolio value before liquidation
+        bool canOpenPositions; // Health factor allows new positions
+        bool isAtRiskOfLiquidation; // Health factor between 100% and 115%
     }
 
     constructor(address _portfolioMargin) {
@@ -27,15 +27,12 @@ contract ValenceHealthCalculator {
     }
 
     /// @notice Computes comprehensive health and solvency metrics for a subaccount.
-    function getAccountHealthMetrics(bytes32 subaccountId)
-        external
-        view
-        returns (HealthMetrics memory metrics)
-    {
+    function getAccountHealthMetrics(bytes32 subaccountId) external view returns (HealthMetrics memory metrics) {
         IValencePortfolioMargin.AccountRiskProfile memory profile = portfolioMargin.evaluateAccountRisk(subaccountId);
 
         metrics.healthFactor = profile.healthFactor;
-        metrics.canOpenPositions = profile.isSolvent && (profile.totalCollateralValueUsd > profile.initialMarginRequiredUsd);
+        metrics.canOpenPositions =
+            profile.isSolvent && (profile.totalCollateralValueUsd > profile.initialMarginRequiredUsd);
 
         if (profile.totalCollateralValueUsd > profile.initialMarginRequiredUsd) {
             metrics.freeCollateralUsd = profile.totalCollateralValueUsd - profile.initialMarginRequiredUsd;

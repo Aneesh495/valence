@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import {IValencePoolFactory} from "../interfaces/IValencePoolFactory.sol";
-import {IValencePool} from "../interfaces/IValencePool.sol";
-import {IValenceSwapCallback} from "./ValencePool.sol";
+import { IValencePoolFactory } from "../interfaces/IValencePoolFactory.sol";
+import { IValencePool } from "../interfaces/IValencePool.sol";
+import { IValenceSwapCallback } from "./ValencePool.sol";
 
 /// @title ValenceQuoter
 /// @notice Stateless exact-input and exact-output quote engine for concentrated liquidity pools.
@@ -11,11 +11,7 @@ import {IValenceSwapCallback} from "./ValencePool.sol";
 contract ValenceQuoter is IValenceSwapCallback {
     address public immutable factory;
 
-    error ValenceQuoter__QuoteResult(
-        uint256 amountOut,
-        uint160 sqrtPriceX96After,
-        int24 tickAfter
-    );
+    error ValenceQuoter__QuoteResult(uint256 amountOut, uint160 sqrtPriceX96After, int24 tickAfter);
 
     error ValenceQuoter__PoolNotFound();
 
@@ -36,25 +32,23 @@ contract ValenceQuoter is IValenceSwapCallback {
         address pool = IValencePoolFactory(factory).getPool(tokenIn, tokenOut, fee);
         if (pool == address(0)) revert ValenceQuoter__PoolNotFound();
 
-        try IValencePool(pool).swap(
-            address(this),
-            zeroForOne,
-            int256(amountIn),
-            sqrtPriceLimitX96 == 0
-                ? (zeroForOne ? 4295128740 : 1461446703485210103287273052203988822378723970341)
-                : sqrtPriceLimitX96,
-            abi.encode(pool)
-        ) {} catch (bytes memory reason) {
+        try IValencePool(pool)
+            .swap(
+                address(this),
+                zeroForOne,
+                int256(amountIn),
+                sqrtPriceLimitX96 == 0
+                    ? (zeroForOne ? 4295128740 : 1461446703485210103287273052203988822378723970341)
+                    : sqrtPriceLimitX96,
+                abi.encode(pool)
+            ) { }
+        catch (bytes memory reason) {
             return _parseRevertReason(reason);
         }
     }
 
     /// @notice Callback called during simulation swap to trigger revert with results.
-    function valenceSwapCallback(
-        int256 amount0Delta,
-        int256 amount1Delta,
-        bytes calldata data
-    ) external view override {
+    function valenceSwapCallback(int256 amount0Delta, int256 amount1Delta, bytes calldata data) external view override {
         address expectedPool = abi.decode(data, (address));
         require(msg.sender == expectedPool, "Unauthorized");
 

@@ -8,11 +8,11 @@ contract ValenceRiskMatrix {
 
     struct MarketRiskConfig {
         bool isConfigured;
-        uint32 baseInitialMarginBps;      // e.g. 500 = 5.0% (20x leverage)
-        uint32 baseMaintenanceMarginBps;  // e.g. 250 = 2.5% (40x leverage)
-        uint32 concentrationScaleFactor;  // Multiplier for size concentration penalty
-        uint256 volatilityWad;            // Annualized volatility in WAD
-        uint32 liquidationFeeBps;         // Reward for liquidator in BPS
+        uint32 baseInitialMarginBps; // e.g. 500 = 5.0% (20x leverage)
+        uint32 baseMaintenanceMarginBps; // e.g. 250 = 2.5% (40x leverage)
+        uint32 concentrationScaleFactor; // Multiplier for size concentration penalty
+        uint256 volatilityWad; // Annualized volatility in WAD
+        uint32 liquidationFeeBps; // Reward for liquidator in BPS
     }
 
     mapping(bytes32 => MarketRiskConfig) private _marketConfigs;
@@ -22,17 +22,10 @@ contract ValenceRiskMatrix {
     mapping(bytes32 => mapping(bytes32 => int256)) private _correlations;
 
     event MarketRiskConfigured(
-        bytes32 indexed marketId,
-        uint32 baseInitialMarginBps,
-        uint32 baseMaintenanceMarginBps,
-        uint256 volatilityWad
+        bytes32 indexed marketId, uint32 baseInitialMarginBps, uint32 baseMaintenanceMarginBps, uint256 volatilityWad
     );
 
-    event CorrelationConfigured(
-        bytes32 indexed marketA,
-        bytes32 indexed marketB,
-        int256 correlationWad
-    );
+    event CorrelationConfigured(bytes32 indexed marketA, bytes32 indexed marketB, int256 correlationWad);
 
     error ValenceRiskMatrix__Unauthorized();
     error ValenceRiskMatrix__InvalidBps();
@@ -55,7 +48,9 @@ contract ValenceRiskMatrix {
         uint256 volatilityWad,
         uint32 liquidationFeeBps
     ) external onlyOwner {
-        if (baseInitialMarginBps < baseMaintenanceMarginBps) revert ValenceRiskMatrix__InvalidBps();
+        if (baseInitialMarginBps < baseMaintenanceMarginBps) {
+            revert ValenceRiskMatrix__InvalidBps();
+        }
         if (baseInitialMarginBps > 10000) revert ValenceRiskMatrix__InvalidBps();
 
         if (!_marketConfigs[marketId].isConfigured) {
@@ -77,11 +72,7 @@ contract ValenceRiskMatrix {
         emit MarketRiskConfigured(marketId, baseInitialMarginBps, baseMaintenanceMarginBps, volatilityWad);
     }
 
-    function setCorrelation(
-        bytes32 marketA,
-        bytes32 marketB,
-        int256 correlationWad
-    ) external onlyOwner {
+    function setCorrelation(bytes32 marketA, bytes32 marketB, int256 correlationWad) external onlyOwner {
         if (correlationWad < -1e18 || correlationWad > 1e18) revert ValenceRiskMatrix__CorrelationOutOfBounds();
 
         _correlations[marketA][marketB] = correlationWad;

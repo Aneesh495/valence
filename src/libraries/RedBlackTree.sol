@@ -112,12 +112,7 @@ library RedBlackTree {
             }
         }
 
-        self.nodes[key] = Node({
-            parent: parent,
-            left: EMPTY,
-            right: EMPTY,
-            red: true
-        });
+        self.nodes[key] = Node({ parent: parent, left: EMPTY, right: EMPTY, red: true });
 
         if (parent == EMPTY) {
             self.root = key;
@@ -272,8 +267,8 @@ library RedBlackTree {
                     w = self.nodes[xParent].right;
                 }
                 if (
-                    (self.nodes[w].left == EMPTY || !self.nodes[self.nodes[w].left].red) &&
-                    (self.nodes[w].right == EMPTY || !self.nodes[self.nodes[w].right].red)
+                    (self.nodes[w].left == EMPTY || !self.nodes[self.nodes[w].left].red)
+                        && (self.nodes[w].right == EMPTY || !self.nodes[self.nodes[w].right].red)
                 ) {
                     self.nodes[w].red = true;
                     x = xParent;
@@ -305,8 +300,8 @@ library RedBlackTree {
                     w = self.nodes[xParent].left;
                 }
                 if (
-                    (self.nodes[w].right == EMPTY || !self.nodes[self.nodes[w].right].red) &&
-                    (self.nodes[w].left == EMPTY || !self.nodes[self.nodes[w].left].red)
+                    (self.nodes[w].right == EMPTY || !self.nodes[self.nodes[w].right].red)
+                        && (self.nodes[w].left == EMPTY || !self.nodes[self.nodes[w].left].red)
                 ) {
                     self.nodes[w].red = true;
                     x = xParent;
