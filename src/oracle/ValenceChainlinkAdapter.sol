@@ -48,11 +48,7 @@ contract ValenceChainlinkAdapter {
         if (aggregator == address(0)) revert ValenceChainlinkAdapter__ZeroAddress();
         uint8 dec = IAggregatorV3(aggregator).decimals();
 
-        _feeds[marketId] = FeedMetadata({
-            aggregator: aggregator,
-            decimals: dec,
-            isConfigured: true
-        });
+        _feeds[marketId] = FeedMetadata({ aggregator: aggregator, decimals: dec, isConfigured: true });
 
         emit ChainlinkFeedRegistered(marketId, aggregator, dec);
     }

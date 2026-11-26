@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import {IValenceVault} from "../interfaces/IValenceVault.sol";
-import {IValenceAccount} from "../interfaces/IValenceAccount.sol";
-import {IValenceOracleRelay} from "../interfaces/IValenceOracleRelay.sol";
-import {IValencePortfolioMargin} from "../interfaces/IValencePortfolioMargin.sol";
-import {IERC20} from "../interfaces/IERC20.sol";
-import {IERC4626} from "../interfaces/IERC4626.sol";
-import {FixedPointMath} from "../libraries/FixedPointMath.sol";
+import { IValenceVault } from "../interfaces/IValenceVault.sol";
+import { IValenceAccount } from "../interfaces/IValenceAccount.sol";
+import { IValenceOracleRelay } from "../interfaces/IValenceOracleRelay.sol";
+import { IValencePortfolioMargin } from "../interfaces/IValencePortfolioMargin.sol";
+import { IERC20 } from "../interfaces/IERC20.sol";
+import { IERC4626 } from "../interfaces/IERC4626.sol";
+import { FixedPointMath } from "../libraries/FixedPointMath.sol";
 
 /// @title ValenceVault
 /// @notice Multi-asset collateral custody vault supporting standard ERC-20 and ERC-4626 yield assets.
@@ -125,12 +125,7 @@ contract ValenceVault is IValenceVault {
     }
 
     /// @notice Withdraws collateral from a subaccount.
-    function withdraw(
-        bytes32 subaccountId,
-        address asset,
-        uint256 amount,
-        address recipient
-    ) external nonReentrant {
+    function withdraw(bytes32 subaccountId, address asset, uint256 amount, address recipient) external nonReentrant {
         if (amount == 0) revert ValenceVault__ZeroAmount();
         if (recipient == address(0)) revert ValenceVault__ZeroAddress();
 
@@ -160,12 +155,10 @@ contract ValenceVault is IValenceVault {
     }
 
     /// @notice Internal transfer between subaccounts (called by Clearinghouse for settlement/liquidation).
-    function transferInternal(
-        bytes32 fromSubaccount,
-        bytes32 toSubaccount,
-        address asset,
-        uint256 amount
-    ) external onlyClearinghouse {
+    function transferInternal(bytes32 fromSubaccount, bytes32 toSubaccount, address asset, uint256 amount)
+        external
+        onlyClearinghouse
+    {
         if (amount == 0) revert ValenceVault__ZeroAmount();
         uint256 balanceFrom = _subaccountBalances[fromSubaccount][asset];
         if (balanceFrom < amount) revert ValenceVault__InsufficientBalance();
@@ -232,32 +225,28 @@ contract ValenceVault is IValenceVault {
         uint8 decimals = 18;
         try IERC20(asset).decimals() returns (uint8 dec) {
             decimals = dec;
-        } catch {}
+        } catch { }
 
         bytes32 marketId = bytes32(uint256(uint160(asset)));
         uint256 priceX96 = (address(oracleRelay) != address(0)) ? oracleRelay.getIndexPrice(marketId) : (1 << 96);
 
         // Value in WAD = balance * priceX96 * 1e18 / (2^96 * 10^decimals)
-        uint256 scaledBalance = decimals <= 18
-            ? underlyingBalance * (10 ** (18 - decimals))
-            : underlyingBalance / (10 ** (decimals - 18));
+        uint256 scaledBalance =
+            decimals <= 18 ? underlyingBalance * (10 ** (18 - decimals)) : underlyingBalance / (10 ** (decimals - 18));
 
         return (scaledBalance * priceX96) >> 96;
     }
 
     function _safeTransfer(address token, address to, uint256 value) private {
-        (bool success, bytes memory data) = token.call(
-            abi.encodeWithSelector(IERC20.transfer.selector, to, value)
-        );
+        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(IERC20.transfer.selector, to, value));
         if (!success || (data.length > 0 && !abi.decode(data, (bool)))) {
             revert ValenceVault__TransferFailed();
         }
     }
 
     function _safeTransferFrom(address token, address from, address to, uint256 value) private {
-        (bool success, bytes memory data) = token.call(
-            abi.encodeWithSelector(IERC20.transferFrom.selector, from, to, value)
-        );
+        (bool success, bytes memory data) =
+            token.call(abi.encodeWithSelector(IERC20.transferFrom.selector, from, to, value));
         if (!success || (data.length > 0 && !abi.decode(data, (bool)))) {
             revert ValenceVault__TransferFailed();
         }

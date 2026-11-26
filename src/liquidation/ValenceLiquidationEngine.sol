@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import {IValenceLiquidationEngine} from "../interfaces/IValenceLiquidationEngine.sol";
-import {IValencePortfolioMargin} from "../interfaces/IValencePortfolioMargin.sol";
-import {IValenceVault} from "../interfaces/IValenceVault.sol";
-import {IValenceInsuranceFund} from "../interfaces/IValenceInsuranceFund.sol";
-import {FixedPointMath} from "../libraries/FixedPointMath.sol";
-import {IERC20} from "../interfaces/IERC20.sol";
+import { IValenceLiquidationEngine } from "../interfaces/IValenceLiquidationEngine.sol";
+import { IValencePortfolioMargin } from "../interfaces/IValencePortfolioMargin.sol";
+import { IValenceVault } from "../interfaces/IValenceVault.sol";
+import { IValenceInsuranceFund } from "../interfaces/IValenceInsuranceFund.sol";
+import { FixedPointMath } from "../libraries/FixedPointMath.sol";
+import { IERC20 } from "../interfaces/IERC20.sol";
 
 /// @title ValenceLiquidationEngine
 /// @notice Continuous Dutch auction liquidation coordinator with decaying discounts and MEV resistance.
@@ -43,11 +43,7 @@ contract ValenceLiquidationEngine is IValenceLiquidationEngine {
         _;
     }
 
-    constructor(
-        address _portfolioMargin,
-        address _vault,
-        address _insuranceFund
-    ) {
+    constructor(address _portfolioMargin, address _vault, address _insuranceFund) {
         if (_portfolioMargin == address(0) || _vault == address(0) || _insuranceFund == address(0)) {
             revert ValenceLiquidationEngine__ZeroAddress();
         }
@@ -69,7 +65,10 @@ contract ValenceLiquidationEngine is IValenceLiquidationEngine {
 
         if (_subaccountActiveAuction[subaccountId] != bytes32(0)) {
             bytes32 existing = _subaccountActiveAuction[subaccountId];
-            if (!_auctions[existing].isResolved && block.timestamp <= _auctions[existing].startTime + _auctions[existing].duration) {
+            if (
+                !_auctions[existing].isResolved
+                    && block.timestamp <= _auctions[existing].startTime + _auctions[existing].duration
+            ) {
                 revert ValenceLiquidationEngine__AuctionAlreadyActive();
             }
         }

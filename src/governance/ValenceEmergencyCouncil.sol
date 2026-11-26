@@ -56,11 +56,7 @@ contract ValenceEmergencyCouncil {
         require(proposals[actionId].target == address(0), "Already proposed");
 
         proposals[actionId] = ActionProposal({
-            actionId: actionId,
-            target: target,
-            callData: data,
-            approvalsCount: 1,
-            isExecuted: false
+            actionId: actionId, target: target, callData: data, approvalsCount: 1, isExecuted: false
         });
 
         hasApproved[actionId][msg.sender] = true;

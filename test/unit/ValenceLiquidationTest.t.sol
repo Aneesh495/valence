@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import {Test} from "forge-std/Test.sol";
-import {ValenceLiquidationEngine} from "../../src/liquidation/ValenceLiquidationEngine.sol";
-import {IValencePortfolioMargin} from "../../src/interfaces/IValencePortfolioMargin.sol";
-import {IValenceLiquidationEngine} from "../../src/interfaces/IValenceLiquidationEngine.sol";
+import { Test } from "forge-std/Test.sol";
+import { ValenceLiquidationEngine } from "../../src/liquidation/ValenceLiquidationEngine.sol";
+import { IValencePortfolioMargin } from "../../src/interfaces/IValencePortfolioMargin.sol";
+import { IValenceLiquidationEngine } from "../../src/interfaces/IValenceLiquidationEngine.sol";
 
 contract MockLiquidationPortfolioMargin is IValencePortfolioMargin {
     bool public isAccountLiquidatable = false;
@@ -71,11 +71,7 @@ contract ValenceLiquidationTest is Test {
 
     function setUp() public {
         mockMargin = new MockLiquidationPortfolioMargin();
-        liqEngine = new ValenceLiquidationEngine(
-            address(mockMargin),
-            mockVault,
-            mockInsuranceFund
-        );
+        liqEngine = new ValenceLiquidationEngine(address(mockMargin), mockVault, mockInsuranceFund);
     }
 
     function test_Liquidation_RevertSolventAccount() public {

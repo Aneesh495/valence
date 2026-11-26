@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import {Test} from "forge-std/Test.sol";
-import {FullMath} from "../../src/libraries/FullMath.sol";
-import {FixedPointMath} from "../../src/libraries/FixedPointMath.sol";
-import {TickMath} from "../../src/libraries/TickMath.sol";
-import {BitMath} from "../../src/libraries/BitMath.sol";
-import {SafeCast} from "../../src/libraries/SafeCast.sol";
-import {MatrixMath} from "../../src/libraries/MatrixMath.sol";
-import {RedBlackTree} from "../../src/libraries/RedBlackTree.sol";
-import {LinkedList} from "../../src/libraries/LinkedList.sol";
+import { Test } from "forge-std/Test.sol";
+import { FullMath } from "../../src/libraries/FullMath.sol";
+import { FixedPointMath } from "../../src/libraries/FixedPointMath.sol";
+import { TickMath } from "../../src/libraries/TickMath.sol";
+import { BitMath } from "../../src/libraries/BitMath.sol";
+import { SafeCast } from "../../src/libraries/SafeCast.sol";
+import { MatrixMath } from "../../src/libraries/MatrixMath.sol";
+import { RedBlackTree } from "../../src/libraries/RedBlackTree.sol";
+import { LinkedList } from "../../src/libraries/LinkedList.sol";
 
 contract TreeWrapper {
     using RedBlackTree for RedBlackTree.Tree;
@@ -226,7 +226,7 @@ contract MathLibrariesTest is Test {
             -100e18, // short 100
             0.5e18, // 50% vol
             0.5e18, // 50% vol
-            0.9e18  // 90% correlated
+            0.9e18 // 90% correlated
         );
         // With 90% correlation, net risk of long/short hedge should be significantly smaller than unhedged (50e18)
         assertTrue(netRisk < 25e18);

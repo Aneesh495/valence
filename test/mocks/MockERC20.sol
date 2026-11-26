@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import {IERC20} from "../../src/interfaces/IERC20.sol";
+import { IERC20 } from "../../src/interfaces/IERC20.sol";
 
 contract MockERC20 is IERC20 {
     string public override name;
@@ -54,15 +54,7 @@ contract MockERC20 is IERC20 {
         return true;
     }
 
-    function permit(
-        address owner,
-        address spender,
-        uint256 value,
-        uint256,
-        uint8,
-        bytes32,
-        bytes32
-    ) external override {
+    function permit(address owner, address spender, uint256 value, uint256, uint8, bytes32, bytes32) external override {
         allowance[owner][spender] = value;
     }
 }

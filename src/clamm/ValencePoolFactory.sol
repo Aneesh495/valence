@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import {IValencePoolFactory} from "../interfaces/IValencePoolFactory.sol";
-import {ValencePool, IValencePoolDeployer} from "./ValencePool.sol";
+import { IValencePoolFactory } from "../interfaces/IValencePoolFactory.sol";
+import { ValencePool, IValencePoolDeployer } from "./ValencePool.sol";
 
 /// @title ValencePoolFactory
 /// @notice Deploys and indexes concentrated liquidity pools with deterministic salt and fee tiers.
@@ -39,10 +39,10 @@ contract ValencePoolFactory is IValencePoolFactory, IValencePoolDeployer {
         owner = msg.sender;
 
         // Default canonical fee tiers
-        _enableFeeTier(100, 1);     // 0.01% - tickSpacing 1
-        _enableFeeTier(500, 10);   // 0.05% - tickSpacing 10
-        _enableFeeTier(3000, 60);  // 0.30% - tickSpacing 60
-        _enableFeeTier(10000, 200);// 1.00% - tickSpacing 200
+        _enableFeeTier(100, 1); // 0.01% - tickSpacing 1
+        _enableFeeTier(500, 10); // 0.05% - tickSpacing 10
+        _enableFeeTier(3000, 60); // 0.30% - tickSpacing 60
+        _enableFeeTier(10000, 200); // 1.00% - tickSpacing 200
     }
 
     function setOwner(address _owner) external override onlyOwner {
@@ -54,11 +54,7 @@ contract ValencePoolFactory is IValencePoolFactory, IValencePoolDeployer {
         _enableFeeTier(fee, tickSpacing);
     }
 
-    function createPool(
-        address tokenA,
-        address tokenB,
-        uint24 fee
-    ) external override returns (address pool) {
+    function createPool(address tokenA, address tokenB, uint24 fee) external override returns (address pool) {
         if (tokenA == tokenB) revert ValencePoolFactory__IdenticalAddresses();
         (address token0, address token1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
         if (token0 == address(0)) revert ValencePoolFactory__ZeroAddress();
@@ -67,16 +63,11 @@ contract ValencePoolFactory is IValencePoolFactory, IValencePoolDeployer {
         if (tickSpacing == 0) revert ValencePoolFactory__FeeTierNotEnabled();
         if (getPool[token0][token1][fee] != address(0)) revert ValencePoolFactory__PoolAlreadyExists();
 
-        parameters = Parameters({
-            factory: address(this),
-            token0: token0,
-            token1: token1,
-            fee: fee,
-            tickSpacing: tickSpacing
-        });
+        parameters =
+            Parameters({ factory: address(this), token0: token0, token1: token1, fee: fee, tickSpacing: tickSpacing });
 
         bytes32 salt = keccak256(abi.encodePacked(token0, token1, fee));
-        pool = address(new ValencePool{salt: salt}());
+        pool = address(new ValencePool{ salt: salt }());
         delete parameters;
 
         getPool[token0][token1][fee] = pool;

@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import {Test} from "forge-std/Test.sol";
-import {ValenceVault} from "../../src/core/ValenceVault.sol";
-import {ValenceAccount} from "../../src/core/ValenceAccount.sol";
-import {MockERC20} from "../mocks/MockERC20.sol";
+import { Test } from "forge-std/Test.sol";
+import { ValenceVault } from "../../src/core/ValenceVault.sol";
+import { ValenceAccount } from "../../src/core/ValenceAccount.sol";
+import { MockERC20 } from "../mocks/MockERC20.sol";
 
 contract ValenceHandler is Test {
     ValenceVault public vault;
@@ -14,11 +14,7 @@ contract ValenceHandler is Test {
     bytes32[] public subaccounts;
     uint256 public totalGhostDeposits;
 
-    constructor(
-        address _vault,
-        address _account,
-        address _usdc
-    ) {
+    constructor(address _vault, address _account, address _usdc) {
         vault = ValenceVault(_vault);
         account = ValenceAccount(_account);
         usdc = MockERC20(_usdc);

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import {IValenceFundingEngine} from "../interfaces/IValenceFundingEngine.sol";
-import {IValenceOracleRelay} from "../interfaces/IValenceOracleRelay.sol";
-import {FixedPointMath} from "../libraries/FixedPointMath.sol";
+import { IValenceFundingEngine } from "../interfaces/IValenceFundingEngine.sol";
+import { IValenceOracleRelay } from "../interfaces/IValenceOracleRelay.sol";
+import { FixedPointMath } from "../libraries/FixedPointMath.sol";
 
 /// @title ValenceFundingEngine
 /// @notice Computes mark-to-index continuous perpetual funding rates and maintains cumulative funding indices.
@@ -37,11 +37,10 @@ contract ValenceFundingEngine is IValenceFundingEngine {
         oracleRelay = IValenceOracleRelay(_oracleRelay);
     }
 
-    function configureMarketFunding(
-        bytes32 marketId,
-        uint32 fundingIntervalSeconds,
-        int32 maxFundingRateWad
-    ) external onlyOwner {
+    function configureMarketFunding(bytes32 marketId, uint32 fundingIntervalSeconds, int32 maxFundingRateWad)
+        external
+        onlyOwner
+    {
         require(fundingIntervalSeconds > 0, "Invalid interval");
         _states[marketId] = MarketFundingState({
             cumulativeFundingIndexWad: 0,
@@ -90,11 +89,12 @@ contract ValenceFundingEngine is IValenceFundingEngine {
     }
 
     /// @notice Computes accrued funding PnL for a position since entry index.
-    function getAccruedFunding(
-        bytes32 marketId,
-        int256 entryFundingIndex,
-        int256 positionSize
-    ) external view override returns (int256 fundingPnl) {
+    function getAccruedFunding(bytes32 marketId, int256 entryFundingIndex, int256 positionSize)
+        external
+        view
+        override
+        returns (int256 fundingPnl)
+    {
         if (positionSize == 0) return 0;
         MarketFundingState memory state = _states[marketId];
 

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import {IERC20} from "../interfaces/IERC20.sol";
+import { IERC20 } from "../interfaces/IERC20.sol";
 
 /// @title ValenceFeeDistributor
 /// @notice Streams trading fee revenue between insurance tranches, treasury, maker rebates, and referrers.
@@ -18,11 +18,7 @@ contract ValenceFeeDistributor {
     mapping(address => address) public referrers; // trader => referrer
 
     event FeeDistributed(
-        uint256 totalFee,
-        uint256 insuranceShare,
-        uint256 treasuryShare,
-        uint256 makerRebate,
-        uint256 referrerShare
+        uint256 totalFee, uint256 insuranceShare, uint256 treasuryShare, uint256 makerRebate, uint256 referrerShare
     );
 
     event RebateClaimed(address indexed recipient, uint256 amount);
@@ -43,11 +39,7 @@ contract ValenceFeeDistributor {
         _;
     }
 
-    constructor(
-        address _feeToken,
-        address _treasury,
-        address _insuranceFund
-    ) {
+    constructor(address _feeToken, address _treasury, address _insuranceFund) {
         if (_feeToken == address(0) || _treasury == address(0) || _insuranceFund == address(0)) {
             revert ValenceFeeDistributor__ZeroAddress();
         }
@@ -70,17 +62,13 @@ contract ValenceFeeDistributor {
     }
 
     /// @notice Splits trading fees across protocol stakeholders.
-    function distributeFee(
-        uint256 feeAmount,
-        address maker,
-        address taker
-    ) external onlyClearinghouse {
+    function distributeFee(uint256 feeAmount, address maker, address taker) external onlyClearinghouse {
         if (feeAmount == 0) return;
 
         uint256 insuranceShare = (feeAmount * 5000) / 10000; // 50%
-        uint256 treasuryShare = (feeAmount * 3000) / 10000;  // 30%
-        uint256 makerRebate = (feeAmount * 1000) / 10000;    // 10%
-        uint256 referrerShare = (feeAmount * 1000) / 10000;  // 10%
+        uint256 treasuryShare = (feeAmount * 3000) / 10000; // 30%
+        uint256 makerRebate = (feeAmount * 1000) / 10000; // 10%
+        uint256 referrerShare = (feeAmount * 1000) / 10000; // 10%
 
         if (maker != address(0)) {
             claimableRebates[maker] += makerRebate;
@@ -117,9 +105,7 @@ contract ValenceFeeDistributor {
     }
 
     function _safeTransfer(address token, address to, uint256 amount) private {
-        (bool success, bytes memory data) = token.call(
-            abi.encodeWithSelector(IERC20.transfer.selector, to, amount)
-        );
+        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(IERC20.transfer.selector, to, amount));
         if (!success || (data.length > 0 && !abi.decode(data, (bool)))) {
             revert ValenceFeeDistributor__TransferFailed();
         }

@@ -4,8 +4,15 @@ pragma solidity 0.8.27;
 /// @title IValenceOrderBook
 /// @notice Interface for on-chain hybrid limit order book and crossing engine.
 interface IValenceOrderBook {
-    enum OrderSide { BUY, SELL }
-    enum OrderType { LIMIT, POST_ONLY, IMMEDIATE_OR_CANCEL }
+    enum OrderSide {
+        BUY,
+        SELL
+    }
+    enum OrderType {
+        LIMIT,
+        POST_ONLY,
+        IMMEDIATE_OR_CANCEL
+    }
 
     event LimitOrderPlaced(
         bytes32 indexed orderId,
@@ -18,10 +25,7 @@ interface IValenceOrderBook {
 
     event LimitOrderCancelled(bytes32 indexed orderId, bytes32 indexed subaccountId);
     event LimitOrderFilled(
-        bytes32 indexed orderId,
-        bytes32 indexed matchedOrderId,
-        uint256 executedPriceX96,
-        uint256 executedQuantity
+        bytes32 indexed orderId, bytes32 indexed matchedOrderId, uint256 executedPriceX96, uint256 executedQuantity
     );
 
     struct Order {

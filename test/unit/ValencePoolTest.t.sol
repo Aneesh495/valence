@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import {Test} from "forge-std/Test.sol";
-import {ValencePoolFactory} from "../../src/clamm/ValencePoolFactory.sol";
-import {ValencePool, IValenceMintCallback, IValenceSwapCallback} from "../../src/clamm/ValencePool.sol";
-import {MockERC20} from "../mocks/MockERC20.sol";
-import {TickMath} from "../../src/libraries/TickMath.sol";
+import { Test } from "forge-std/Test.sol";
+import { ValencePoolFactory } from "../../src/clamm/ValencePoolFactory.sol";
+import { ValencePool, IValenceMintCallback, IValenceSwapCallback } from "../../src/clamm/ValencePool.sol";
+import { MockERC20 } from "../mocks/MockERC20.sol";
+import { TickMath } from "../../src/libraries/TickMath.sol";
 
 contract PoolCaller is IValenceMintCallback, IValenceSwapCallback {
     function valenceMintCallback(uint256 amount0Owed, uint256 amount1Owed, bytes calldata data) external override {
@@ -73,13 +73,7 @@ contract ValencePoolTest is Test {
         // Mint through caller contract
         bytes memory data = abi.encode(address(token0), address(token1));
         vm.prank(address(caller));
-        (uint256 amount0, uint256 amount1) = pool.mint(
-            address(caller),
-            tickLower,
-            tickUpper,
-            liquidityAmount,
-            data
-        );
+        (uint256 amount0, uint256 amount1) = pool.mint(address(caller), tickLower, tickUpper, liquidityAmount, data);
 
         assertTrue(amount0 > 0);
         assertTrue(amount1 > 0);
@@ -110,13 +104,14 @@ contract ValencePoolTest is Test {
         uint160 minSqrtLimit = 4295128740; // minimum price
 
         vm.prank(address(caller));
-        (int256 amount0, int256 amount1) = pool.swap(
-            address(caller),
-            true, // zeroForOne
-            amountIn,
-            minSqrtLimit,
-            data
-        );
+        (int256 amount0, int256 amount1) =
+            pool.swap(
+                address(caller),
+                true, // zeroForOne
+                amountIn,
+                minSqrtLimit,
+                data
+            );
 
         assertEq(amount0, amountIn);
         assertTrue(amount1 < 0); // Negative indicates output to recipient

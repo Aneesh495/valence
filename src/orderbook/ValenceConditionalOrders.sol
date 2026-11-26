@@ -1,15 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import {IValenceAccount} from "../interfaces/IValenceAccount.sol";
-import {IValenceOracleRelay} from "../interfaces/IValenceOracleRelay.sol";
-import {IValenceClearinghouse} from "../interfaces/IValenceClearinghouse.sol";
+import { IValenceAccount } from "../interfaces/IValenceAccount.sol";
+import { IValenceOracleRelay } from "../interfaces/IValenceOracleRelay.sol";
+import { IValenceClearinghouse } from "../interfaces/IValenceClearinghouse.sol";
 
 /// @title ValenceConditionalOrders
 /// @notice On-chain conditional order registry supporting Stop-Loss, Take-Profit, and Trailing Stops.
 /// @dev Monitored by decentralized keeper bots with automated trigger validation against Oracle Relay.
 contract ValenceConditionalOrders {
-    enum TriggerType { STOP_LOSS, TAKE_PROFIT, TRAILING_STOP }
+    enum TriggerType {
+        STOP_LOSS,
+        TAKE_PROFIT,
+        TRAILING_STOP
+    }
 
     struct ConditionalOrder {
         bytes32 triggerId;
@@ -44,11 +48,7 @@ contract ValenceConditionalOrders {
         uint256 triggerPriceX96
     );
 
-    event ConditionalOrderTriggered(
-        bytes32 indexed triggerId,
-        address indexed keeper,
-        uint256 executedPriceX96
-    );
+    event ConditionalOrderTriggered(bytes32 indexed triggerId, address indexed keeper, uint256 executedPriceX96);
 
     event ConditionalOrderCancelled(bytes32 indexed triggerId);
 
@@ -141,11 +141,19 @@ contract ValenceConditionalOrders {
 
         // Evaluate trigger condition
         if (order.triggerType == TriggerType.STOP_LOSS) {
-            if (order.isLong && currentMarkPrice > order.triggerPriceX96) revert ValenceConditionalOrders__ConditionNotMet();
-            if (!order.isLong && currentMarkPrice < order.triggerPriceX96) revert ValenceConditionalOrders__ConditionNotMet();
+            if (order.isLong && currentMarkPrice > order.triggerPriceX96) {
+                revert ValenceConditionalOrders__ConditionNotMet();
+            }
+            if (!order.isLong && currentMarkPrice < order.triggerPriceX96) {
+                revert ValenceConditionalOrders__ConditionNotMet();
+            }
         } else if (order.triggerType == TriggerType.TAKE_PROFIT) {
-            if (order.isLong && currentMarkPrice < order.triggerPriceX96) revert ValenceConditionalOrders__ConditionNotMet();
-            if (!order.isLong && currentMarkPrice > order.triggerPriceX96) revert ValenceConditionalOrders__ConditionNotMet();
+            if (order.isLong && currentMarkPrice < order.triggerPriceX96) {
+                revert ValenceConditionalOrders__ConditionNotMet();
+            }
+            if (!order.isLong && currentMarkPrice > order.triggerPriceX96) {
+                revert ValenceConditionalOrders__ConditionNotMet();
+            }
         } else if (order.triggerType == TriggerType.TRAILING_STOP) {
             if (order.isLong) {
                 if (currentMarkPrice > order.peakPriceX96) {
@@ -169,12 +177,8 @@ contract ValenceConditionalOrders {
         order.isTriggered = true;
 
         if (address(clearinghouse) != address(0)) {
-            (executedPriceX96,) = clearinghouse.executeTrade(
-                order.subaccountId,
-                order.marketId,
-                order.sizeDelta,
-                order.limitPriceX96
-            );
+            (executedPriceX96,) =
+                clearinghouse.executeTrade(order.subaccountId, order.marketId, order.sizeDelta, order.limitPriceX96);
         } else {
             executedPriceX96 = currentMarkPrice;
         }

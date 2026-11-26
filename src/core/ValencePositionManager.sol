@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import {IValencePortfolioMargin} from "../interfaces/IValencePortfolioMargin.sol";
-import {IValenceOracleRelay} from "../interfaces/IValenceOracleRelay.sol";
-import {IValenceFundingEngine} from "../interfaces/IValenceFundingEngine.sol";
-import {FixedPointMath} from "../libraries/FixedPointMath.sol";
-import {SafeCast} from "../libraries/SafeCast.sol";
+import { IValencePortfolioMargin } from "../interfaces/IValencePortfolioMargin.sol";
+import { IValenceOracleRelay } from "../interfaces/IValenceOracleRelay.sol";
+import { IValenceFundingEngine } from "../interfaces/IValenceFundingEngine.sol";
+import { FixedPointMath } from "../libraries/FixedPointMath.sol";
+import { SafeCast } from "../libraries/SafeCast.sol";
 
 /// @title ValencePositionManager
 /// @notice Manages perpetual derivative position lifecycle, weighted entry prices, and realized PnL.
@@ -23,9 +23,9 @@ contract ValencePositionManager {
 
     struct Position {
         bytes32 marketId;
-        int256 size;                      // Positive for long, negative for short (in WAD)
-        uint256 entryPriceX96;            // Weighted average entry price in 2^96 format
-        int256 lastFundingIndexWad;       // Cumulative funding index at last settlement
+        int256 size; // Positive for long, negative for short (in WAD)
+        uint256 entryPriceX96; // Weighted average entry price in 2^96 format
+        int256 lastFundingIndexWad; // Cumulative funding index at last settlement
         uint64 lastTradeTimestamp;
     }
 
@@ -84,12 +84,11 @@ contract ValencePositionManager {
     }
 
     /// @notice Modifies a subaccount's perpetual position, calculating realized PnL on reductions.
-    function modifyPosition(
-        bytes32 subaccountId,
-        bytes32 marketId,
-        int256 sizeDelta,
-        uint256 executionPriceX96
-    ) external onlyClearinghouse returns (int256 realizedPnlUsd) {
+    function modifyPosition(bytes32 subaccountId, bytes32 marketId, int256 sizeDelta, uint256 executionPriceX96)
+        external
+        onlyClearinghouse
+        returns (int256 realizedPnlUsd)
+    {
         if (sizeDelta == 0) revert ValencePositionManager__ZeroDelta();
 
         Position storage pos = _positions[subaccountId][marketId];
@@ -122,8 +121,10 @@ contract ValencePositionManager {
             uint256 closeSizeAbs = FixedPointMath.min(FixedPointMath.abs(currentSize), FixedPointMath.abs(sizeDelta));
 
             int256 priceDiffWad = currentSize > 0
-                ? int256((executionPriceX96 * FixedPointMath.WAD) >> 96) - int256((currentEntry * FixedPointMath.WAD) >> 96)
-                : int256((currentEntry * FixedPointMath.WAD) >> 96) - int256((executionPriceX96 * FixedPointMath.WAD) >> 96);
+                ? int256((executionPriceX96 * FixedPointMath.WAD) >> 96)
+                    - int256((currentEntry * FixedPointMath.WAD) >> 96)
+                : int256((currentEntry * FixedPointMath.WAD) >> 96)
+                    - int256((executionPriceX96 * FixedPointMath.WAD) >> 96);
 
             int256 pnl = (priceDiffWad * int256(closeSizeAbs)) / int256(FixedPointMath.WAD);
             realizedPnlUsd += pnl;

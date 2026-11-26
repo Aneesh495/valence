@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import {FixedPointMath} from "./FixedPointMath.sol";
+import { FixedPointMath } from "./FixedPointMath.sol";
 
 /// @title MatrixMath
 /// @notice Matrix arithmetic and quadratic risk form evaluations for SPAN-style portfolio margin.
@@ -34,10 +34,11 @@ library MatrixMath {
     /// @param weights Position notional weights vector w of length N in WAD
     /// @param covMatrix Flattened covariance matrix of length N * N in WAD
     /// @return portfolioVariance The net portfolio variance in WAD
-    function quadraticRiskForm(
-        int256[] memory weights,
-        int256[] memory covMatrix
-    ) internal pure returns (uint256 portfolioVariance) {
+    function quadraticRiskForm(int256[] memory weights, int256[] memory covMatrix)
+        internal
+        pure
+        returns (uint256 portfolioVariance)
+    {
         uint256 n = weights.length;
         if (covMatrix.length != n * n) revert MatrixMath__DimensionMismatch();
 
@@ -84,13 +85,11 @@ library MatrixMath {
     /// @param volB Annualized volatility of asset B in WAD
     /// @param correlation Correlation coefficient between A and B in WAD [-WAD..WAD]
     /// @return netRisk The net portfolio risk of the two-asset pair
-    function twoAssetNetRisk(
-        int256 notionalA,
-        int256 notionalB,
-        uint256 volA,
-        uint256 volB,
-        int256 correlation
-    ) internal pure returns (uint256 netRisk) {
+    function twoAssetNetRisk(int256 notionalA, int256 notionalB, uint256 volA, uint256 volB, int256 correlation)
+        internal
+        pure
+        returns (uint256 netRisk)
+    {
         int256 riskA = (notionalA * int256(volA)) / int256(FixedPointMath.WAD);
         int256 riskB = (notionalB * int256(volB)) / int256(FixedPointMath.WAD);
 

@@ -18,5 +18,8 @@ interface IValenceAccount {
     function createSubaccount(uint32 subaccountIndex) external returns (bytes32 subaccountId);
     function getSubaccount(bytes32 subaccountId) external view returns (Subaccount memory);
     function getSubaccountId(address owner, uint32 subaccountIndex) external pure returns (bytes32);
-    function isOwnerOrDelegate(bytes32 subaccountId, address caller, uint32 requiredPermission) external view returns (bool);
+    function isOwnerOrDelegate(bytes32 subaccountId, address caller, uint32 requiredPermission)
+        external
+        view
+        returns (bool);
 }

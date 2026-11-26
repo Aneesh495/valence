@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import {IValenceAccount} from "../interfaces/IValenceAccount.sol";
+import { IValenceAccount } from "../interfaces/IValenceAccount.sol";
 
 /// @title ValenceEIP712Signer
 /// @notice Off-chain signed order verification and word-aligned nonce cancellation bitmap engine.
@@ -55,10 +55,7 @@ contract ValenceEIP712Signer {
     }
 
     /// @notice Verifies an off-chain signed order and marks its nonce as filled/consumed.
-    function verifyAndConsumeOrder(
-        SignedOrder calldata order,
-        bytes calldata signature
-    ) external returns (bool) {
+    function verifyAndConsumeOrder(SignedOrder calldata order, bytes calldata signature) external returns (bool) {
         if (block.timestamp > order.deadline) revert ValenceEIP712Signer__SignatureExpired();
         if (order.nonce < minValidNonce[order.subaccountId]) revert ValenceEIP712Signer__NonceAlreadyCancelled();
 

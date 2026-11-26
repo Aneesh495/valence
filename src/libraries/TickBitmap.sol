@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import {BitMath} from "./BitMath.sol";
+import { BitMath } from "./BitMath.sol";
 
 /// @title TickBitmap
 /// @notice Stores packed bitmap of initialized ticks for concentrated liquidity AMM pools.
@@ -20,11 +20,7 @@ library TickBitmap {
     /// @param self The bitmap mapping in contract storage
     /// @param tick The tick to flip
     /// @param tickSpacing The tick spacing of the pool
-    function flipTick(
-        mapping(int16 => uint256) storage self,
-        int24 tick,
-        int24 tickSpacing
-    ) internal {
+    function flipTick(mapping(int16 => uint256) storage self, int24 tick, int24 tickSpacing) internal {
         require(tick % tickSpacing == 0, "Tick not on spacing boundary");
         (int16 wordPos, uint8 bitPos) = position(tick / tickSpacing);
         uint256 mask = 1 << bitPos;

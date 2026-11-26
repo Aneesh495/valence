@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import {Test} from "forge-std/Test.sol";
-import {ValenceAccount} from "../../src/core/ValenceAccount.sol";
-import {ValenceVault} from "../../src/core/ValenceVault.sol";
-import {ValenceRiskMatrix} from "../../src/margin/ValenceRiskMatrix.sol";
-import {ValencePortfolioMargin} from "../../src/margin/ValencePortfolioMargin.sol";
-import {ValenceOracleRelay} from "../../src/oracle/ValenceOracleRelay.sol";
-import {MockERC20} from "../mocks/MockERC20.sol";
-import {IValencePortfolioMargin} from "../../src/interfaces/IValencePortfolioMargin.sol";
+import { Test } from "forge-std/Test.sol";
+import { ValenceAccount } from "../../src/core/ValenceAccount.sol";
+import { ValenceVault } from "../../src/core/ValenceVault.sol";
+import { ValenceRiskMatrix } from "../../src/margin/ValenceRiskMatrix.sol";
+import { ValencePortfolioMargin } from "../../src/margin/ValencePortfolioMargin.sol";
+import { ValenceOracleRelay } from "../../src/oracle/ValenceOracleRelay.sol";
+import { MockERC20 } from "../mocks/MockERC20.sol";
+import { IValencePortfolioMargin } from "../../src/interfaces/IValencePortfolioMargin.sol";
 
 contract MockPositionManager {
     IValencePortfolioMargin.PositionSummary[] private _positions;
@@ -20,11 +20,7 @@ contract MockPositionManager {
         }
     }
 
-    function getSubaccountPositions(bytes32)
-        external
-        view
-        returns (IValencePortfolioMargin.PositionSummary[] memory)
-    {
+    function getSubaccountPositions(bytes32) external view returns (IValencePortfolioMargin.PositionSummary[] memory) {
         return _positions;
     }
 }
@@ -122,11 +118,7 @@ contract ValencePortfolioMarginTest is Test {
         // Severe loss: unrealized PnL = -12,000 USD with 10,000 USD collateral
         IValencePortfolioMargin.PositionSummary[] memory positions = new IValencePortfolioMargin.PositionSummary[](1);
         positions[0] = IValencePortfolioMargin.PositionSummary({
-            marketId: btcMarket,
-            size: 1e18,
-            entryPriceX96: 60000 << 96,
-            unrealizedPnl: -12000e18,
-            notionalUsd: 48000e18
+            marketId: btcMarket, size: 1e18, entryPriceX96: 60000 << 96, unrealizedPnl: -12000e18, notionalUsd: 48000e18
         });
 
         posManager.setPositions(positions);

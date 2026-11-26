@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import {FullMath} from "./FullMath.sol";
+import { FullMath } from "./FullMath.sol";
 
 /// @title FixedPointMath
 /// @notice High-precision fixed-point arithmetic for WAD (1e18) and RAY (1e27) numbers.

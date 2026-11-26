@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import {IValencePortfolioMargin} from "../interfaces/IValencePortfolioMargin.sol";
-import {IValenceVault} from "../interfaces/IValenceVault.sol";
-import {IValenceOracleRelay} from "../interfaces/IValenceOracleRelay.sol";
-import {ValenceRiskMatrix} from "./ValenceRiskMatrix.sol";
-import {MatrixMath} from "../libraries/MatrixMath.sol";
-import {FixedPointMath} from "../libraries/FixedPointMath.sol";
-import {SafeCast} from "../libraries/SafeCast.sol";
+import { IValencePortfolioMargin } from "../interfaces/IValencePortfolioMargin.sol";
+import { IValenceVault } from "../interfaces/IValenceVault.sol";
+import { IValenceOracleRelay } from "../interfaces/IValenceOracleRelay.sol";
+import { ValenceRiskMatrix } from "./ValenceRiskMatrix.sol";
+import { MatrixMath } from "../libraries/MatrixMath.sol";
+import { FixedPointMath } from "../libraries/FixedPointMath.sol";
+import { SafeCast } from "../libraries/SafeCast.sol";
 
 /// @title ValencePortfolioMargin
 /// @notice Evaluates cross-asset portfolio margin requirements using SPAN-style covariance risk models.
@@ -32,11 +32,7 @@ contract ValencePortfolioMargin is IValencePortfolioMargin {
         _;
     }
 
-    constructor(
-        address _vault,
-        address _oracleRelay,
-        address _riskMatrix
-    ) {
+    constructor(address _vault, address _oracleRelay, address _riskMatrix) {
         if (_vault == address(0) || _oracleRelay == address(0) || _riskMatrix == address(0)) {
             revert ValencePortfolioMargin__ZeroAddress();
         }
@@ -99,9 +95,7 @@ contract ValencePortfolioMargin is IValencePortfolioMargin {
             grossImr += posImr;
             grossMmr += posMmr;
 
-            notionals[i] = positions[i].size >= 0
-                ? int256(positions[i].notionalUsd)
-                : -int256(positions[i].notionalUsd);
+            notionals[i] = positions[i].size >= 0 ? int256(positions[i].notionalUsd) : -int256(positions[i].notionalUsd);
 
             ValenceRiskMatrix.MarketRiskConfig memory cfgI = riskMatrix.getMarketConfig(positions[i].marketId);
             grossVolNotional += (positions[i].notionalUsd * cfgI.volatilityWad) / FixedPointMath.WAD;
@@ -183,19 +177,21 @@ contract ValencePortfolioMargin is IValencePortfolioMargin {
     /// @notice Pre-evaluates account risk for a hypothetical trade delta.
     function computeHypotheticalRisk(
         bytes32 subaccountId,
-        bytes32 /*marketId*/,
+        bytes32,
+        /*marketId*/
         int256 /*deltaSize*/
-    ) external view override returns (AccountRiskProfile memory) {
+    )
+        external
+        view
+        override
+        returns (AccountRiskProfile memory)
+    {
         return evaluateAccountRisk(subaccountId);
     }
 
     // --- Private Calculation Helpers ---
 
-    function _computePositionMargins(PositionSummary memory pos)
-        private
-        view
-        returns (uint256 posImr, uint256 posMmr)
-    {
+    function _computePositionMargins(PositionSummary memory pos) private view returns (uint256 posImr, uint256 posMmr) {
         ValenceRiskMatrix.MarketRiskConfig memory cfg = riskMatrix.getMarketConfig(pos.marketId);
         uint256 notional = pos.notionalUsd;
 
@@ -209,19 +205,18 @@ contract ValencePortfolioMargin is IValencePortfolioMargin {
         posMmr = (notional * cfg.baseMaintenanceMarginBps * sizePenaltyWad) / (10000 * FixedPointMath.WAD);
     }
 
-    function _populateCovarianceRow(
-        PositionSummary[] memory positions,
-        int256[] memory covMatrix,
-        uint256 i,
-        uint256 n
-    ) private view {
+    function _populateCovarianceRow(PositionSummary[] memory positions, int256[] memory covMatrix, uint256 i, uint256 n)
+        private
+        view
+    {
         ValenceRiskMatrix.MarketRiskConfig memory cfgI = riskMatrix.getMarketConfig(positions[i].marketId);
         uint256 rowOffset = i * n;
 
         for (uint256 j = 0; j < n;) {
             ValenceRiskMatrix.MarketRiskConfig memory cfgJ = riskMatrix.getMarketConfig(positions[j].marketId);
             int256 rho = riskMatrix.getCorrelation(positions[i].marketId, positions[j].marketId);
-            int256 cov = (rho * int256(cfgI.volatilityWad * cfgJ.volatilityWad)) / int256(FixedPointMath.WAD * FixedPointMath.WAD);
+            int256 cov = (rho * int256(cfgI.volatilityWad * cfgJ.volatilityWad))
+                / int256(FixedPointMath.WAD * FixedPointMath.WAD);
             covMatrix[rowOffset + j] = cov;
             unchecked {
                 j++;
@@ -233,9 +228,8 @@ contract ValencePortfolioMargin is IValencePortfolioMargin {
         if (positionManager == address(0)) {
             return new PositionSummary[](0);
         }
-        (bool success, bytes memory data) = positionManager.staticcall(
-            abi.encodeWithSignature("getSubaccountPositions(bytes32)", subaccountId)
-        );
+        (bool success, bytes memory data) =
+            positionManager.staticcall(abi.encodeWithSignature("getSubaccountPositions(bytes32)", subaccountId));
         if (success && data.length > 0) {
             return abi.decode(data, (PositionSummary[]));
         }

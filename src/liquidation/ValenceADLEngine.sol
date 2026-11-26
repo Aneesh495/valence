@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import {IValenceADLEngine} from "../interfaces/IValenceADLEngine.sol";
-import {IValencePortfolioMargin} from "../interfaces/IValencePortfolioMargin.sol";
-import {FixedPointMath} from "../libraries/FixedPointMath.sol";
+import { IValenceADLEngine } from "../interfaces/IValenceADLEngine.sol";
+import { IValencePortfolioMargin } from "../interfaces/IValencePortfolioMargin.sol";
+import { FixedPointMath } from "../libraries/FixedPointMath.sol";
 
 interface IValenceADLCallback {
     function executeADLClose(
@@ -66,12 +66,12 @@ contract ValenceADLEngine is IValenceADLEngine {
     }
 
     /// @notice Executes auto-deleveraging against the highest ranked counterparties for a market.
-    function executeADL(
-        bytes32 marketId,
-        bytes32 insolventSubaccount,
-        int256 insolventSize,
-        uint256 bankruptcyPriceX96
-    ) external override onlyClearinghouse returns (uint256 sizeDeleveraged) {
+    function executeADL(bytes32 marketId, bytes32 insolventSubaccount, int256 insolventSize, uint256 bankruptcyPriceX96)
+        external
+        override
+        onlyClearinghouse
+        returns (uint256 sizeDeleveraged)
+    {
         bytes32[] memory participants = _marketParticipants[marketId];
         uint256 len = participants.length;
         if (len == 0) revert ValenceADLEngine__NoCounterpartiesAvailable();
@@ -84,13 +84,7 @@ contract ValenceADLEngine is IValenceADLEngine {
                 uint256 portion = neededSize - sizeDeleveraged;
                 sizeDeleveraged += portion;
 
-                emit AutoDeleveraged(
-                    marketId,
-                    insolventSubaccount,
-                    counterparty,
-                    portion,
-                    bankruptcyPriceX96
-                );
+                emit AutoDeleveraged(marketId, insolventSubaccount, counterparty, portion, bankruptcyPriceX96);
             }
             unchecked {
                 i++;

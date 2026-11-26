@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import {IValenceInsuranceFund} from "../interfaces/IValenceInsuranceFund.sol";
-import {IERC20} from "../interfaces/IERC20.sol";
-import {FixedPointMath} from "../libraries/FixedPointMath.sol";
+import { IValenceInsuranceFund } from "../interfaces/IValenceInsuranceFund.sol";
+import { IERC20 } from "../interfaces/IERC20.sol";
+import { FixedPointMath } from "../libraries/FixedPointMath.sol";
 
 /// @title ValenceInsuranceFund
 /// @notice Dual-tranche insurance reserve absorbing systemic bad debt deficits with junior/senior waterfalls.
@@ -126,18 +126,15 @@ contract ValenceInsuranceFund is IValenceInsuranceFund {
     }
 
     function _safeTransfer(address token, address to, uint256 amount) private {
-        (bool success, bytes memory data) = token.call(
-            abi.encodeWithSelector(IERC20.transfer.selector, to, amount)
-        );
+        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(IERC20.transfer.selector, to, amount));
         if (!success || (data.length > 0 && !abi.decode(data, (bool)))) {
             revert ValenceInsuranceFund__TransferFailed();
         }
     }
 
     function _safeTransferFrom(address token, address from, address to, uint256 amount) private {
-        (bool success, bytes memory data) = token.call(
-            abi.encodeWithSelector(IERC20.transferFrom.selector, from, to, amount)
-        );
+        (bool success, bytes memory data) =
+            token.call(abi.encodeWithSelector(IERC20.transferFrom.selector, from, to, amount));
         if (!success || (data.length > 0 && !abi.decode(data, (bool)))) {
             revert ValenceInsuranceFund__TransferFailed();
         }

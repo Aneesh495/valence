@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import {IValenceOracleRelay} from "../interfaces/IValenceOracleRelay.sol";
+import { IValenceOracleRelay } from "../interfaces/IValenceOracleRelay.sol";
 
 /// @title ValenceCircuitBreaker
 /// @notice Volatility tripwire and flash-crash suppression engine for perpetual markets.
@@ -12,9 +12,9 @@ contract ValenceCircuitBreaker {
 
     struct CircuitConfig {
         bool isEnabled;
-        uint32 maxVelocityBps;       // Max permitted price change in basis points (e.g. 1000 = 10%)
-        uint32 windowSeconds;        // Velocity window (e.g. 60 seconds)
-        uint32 cooldownDuration;     // How long market remains paused after trip (e.g. 300 seconds)
+        uint32 maxVelocityBps; // Max permitted price change in basis points (e.g. 1000 = 10%)
+        uint32 windowSeconds; // Velocity window (e.g. 60 seconds)
+        uint32 cooldownDuration; // How long market remains paused after trip (e.g. 300 seconds)
         uint64 lastTripTimestamp;
         uint256 referencePriceX96;
         uint64 referenceTimestamp;

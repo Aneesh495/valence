@@ -38,22 +38,12 @@ contract ValencePythAdapter {
     }
 
     /// @notice Updates the stored Pyth feed observation (simulates Pyth contract update).
-    function updateFeed(
-        bytes32 marketId,
-        int64 price,
-        uint64 conf,
-        int32 expo,
-        uint64 publishTime
-    ) external onlyOwner {
+    function updateFeed(bytes32 marketId, int64 price, uint64 conf, int32 expo, uint64 publishTime) external onlyOwner {
         if (!isSupportedMarket[marketId]) revert ValencePythAdapter__MarketNotSupported();
         if (price <= 0) revert ValencePythAdapter__InvalidPrice();
 
         _feeds[marketId] = PythPriceFeed({
-            priceFeedId: _feeds[marketId].priceFeedId,
-            price: price,
-            conf: conf,
-            expo: expo,
-            publishTime: publishTime
+            priceFeedId: _feeds[marketId].priceFeedId, price: price, conf: conf, expo: expo, publishTime: publishTime
         });
 
         emit PythFeedUpdated(marketId, price, expo, publishTime);

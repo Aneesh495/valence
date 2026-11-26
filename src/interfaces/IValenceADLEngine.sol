@@ -12,10 +12,7 @@ interface IValenceADLEngine {
         uint256 bankruptcyPriceX96
     );
 
-    function executeADL(
-        bytes32 marketId,
-        bytes32 insolventSubaccount,
-        int256 insolventSize,
-        uint256 bankruptcyPriceX96
-    ) external returns (uint256 sizeDeleveraged);
+    function executeADL(bytes32 marketId, bytes32 insolventSubaccount, int256 insolventSize, uint256 bankruptcyPriceX96)
+        external
+        returns (uint256 sizeDeleveraged);
 }
